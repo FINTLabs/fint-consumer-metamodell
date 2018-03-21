@@ -1,3 +1,3 @@
 # fint-consumer-metamodell
 
-Generated from tag `v0.1.0` on package `` and component `metamodell`.
+Generated from tag `v0.2.0` on package `` and component `metamodell`.

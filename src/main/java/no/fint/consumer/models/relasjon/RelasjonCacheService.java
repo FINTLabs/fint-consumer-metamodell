@@ -1,4 +1,4 @@
-package no.fint.consumer.models.klasse;
+package no.fint.consumer.models.relasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +18,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import no.fint.model.metamodell.Klasse;
+import no.fint.model.metamodell.Relasjon;
 import no.fint.model.metamodell.MetamodellActions;
 
 @Slf4j
 @Service
-public class KlasseCacheService extends CacheService<FintResource<Klasse>> {
+public class RelasjonCacheService extends CacheService<FintResource<Relasjon>> {
 
-    public static final String MODEL = Klasse.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Relasjon.class.getSimpleName().toLowerCase();
 
     @Autowired
     private ConsumerEventUtil consumerEventUtil;
@@ -33,8 +33,8 @@ public class KlasseCacheService extends CacheService<FintResource<Klasse>> {
     @Autowired
     private ConsumerProps props;
 
-    public KlasseCacheService() {
-        super(MODEL, MetamodellActions.GET_ALL_KLASSE);
+    public RelasjonCacheService() {
+        super(MODEL, MetamodellActions.GET_ALL_RELASJON);
     }
 
     @PostConstruct
@@ -42,7 +42,7 @@ public class KlasseCacheService extends CacheService<FintResource<Klasse>> {
         Arrays.stream(props.getOrgs()).forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = ConsumerProps.CACHE_INITIALDELAY_KLASSE, fixedRateString = ConsumerProps.CACHE_FIXEDRATE_KLASSE)
+    @Scheduled(initialDelayString = ConsumerProps.CACHE_INITIALDELAY_RELASJON, fixedRateString = ConsumerProps.CACHE_FIXEDRATE_RELASJON)
     public void populateCacheAll() {
         Arrays.stream(props.getOrgs()).forEach(this::populateCache);
     }
@@ -53,17 +53,17 @@ public class KlasseCacheService extends CacheService<FintResource<Klasse>> {
 	}
 
     private void populateCache(String orgId) {
-		log.info("Populating Klasse cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_KLASSE, Constants.CACHE_SERVICE);
+		log.info("Populating Relasjon cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_RELASJON, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<FintResource<Klasse>> getKlasseById(String orgId, String id) {
+    public Optional<FintResource<Relasjon>> getRelasjonById(String orgId, String id) {
         return getOne(orgId, (fintResource) -> Optional
                 .ofNullable(fintResource)
                 .map(FintResource::getResource)
-                .map(Klasse::getId)
+                .map(Relasjon::getId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(_id -> _id.equals(id))
                 .orElse(false));
@@ -72,7 +72,7 @@ public class KlasseCacheService extends CacheService<FintResource<Klasse>> {
 
 	@Override
     public void onAction(Event event) {
-        update(event, new TypeReference<List<FintResource<Klasse>>>() {
+        update(event, new TypeReference<List<FintResource<Relasjon>>>() {
         });
     }
 }

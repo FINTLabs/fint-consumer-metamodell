@@ -27,5 +27,8 @@ public class ConsumerProps {
     public static final String CACHE_INITIALDELAY_PAKKE = "${fint.consumer.cache.initialDelay.pakke:70000}";
     public static final String CACHE_FIXEDRATE_PAKKE = "${fint.consumer.cache.fixedRate.pakke:900000}";
     
+    public static final String CACHE_INITIALDELAY_RELASJON = "${fint.consumer.cache.initialDelay.relasjon:80000}";
+    public static final String CACHE_FIXEDRATE_RELASJON = "${fint.consumer.cache.fixedRate.relasjon:900000}";
+    
 
 }
