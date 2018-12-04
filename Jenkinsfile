@@ -14,9 +14,9 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:build-${BUILD_NUMBER}"
+                sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:build.${BUILD_NUMBER}"
                 withDockerRegistry([credentialsId: 'fintlabs.azurecr.io', url: 'https://fintlabs.azurecr.io']) {
-                    sh "docker push fintlabs.azurecr.io/consumer-metamodell:build-${BUILD_NUMBER}"
+                    sh "docker push fintlabs.azurecr.io/consumer-metamodell:build.${BUILD_NUMBER}"
                 }
             }
         }
@@ -24,8 +24,8 @@ pipeline {
             when { changeRequest() }
             steps {
                 withDockerRegistry([credentialsId: 'fintlabs.azurecr.io', url: 'https://fintlabs.azurecr.io']) {
-                    sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}-${BUILD_NUMBER}"
-                    sh "docker push fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}-${BUILD_NUMBER}"
+                    sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}.${BUILD_NUMBER}"
+                    sh "docker push fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}.${BUILD_NUMBER}"
                 }
             }
         }
