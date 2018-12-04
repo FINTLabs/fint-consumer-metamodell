@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+  labels:
+    fint.stack: metamodell
+    fint.role: provider
+  name: provider-metamodell
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      fint.stack: metamodell
+      fint.role: provider
+  template:
+    metadata:
+      labels:
+        fint.stack: metamodell
+        fint.role: provider
+    spec:
+      containers:
+      - name: provider-metamodell
+        image: fintlabs.azurecr.io/provider:RC-6
+        env:
+        - name: TZ
+          value: Europe/Oslo
+        - name: fint.audit.mongo.databasename
+          value: fint-audit-beta
+        - name: fint.audit.mongo.connection-string
+          valueFrom:
+            secretKeyRef:
+              name: fint-audit
+              key: mongodb
+        - name: fint.events.orgIds
+          value: health.fintlabs.no
+        - name: fint.hazelcast.kubernetes.enabled
+          value: "true"
+        - name: fint.hazelcast.kubernetes.namespace
+          value: default
+        - name: fint.hazelcast.kubernetes.labelName
+          value: fint.stack
+        - name: fint.hazelcast.kubernetes.labelValue
+          value: metamodell
+        - name: fint.provider.assets.endpoint
+          value: https://admin-beta.fintlabs.no/api/components/assets/utdanning_timeplan
+        - name: server.context-path
+          value: /fint/metamodell/provider
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always

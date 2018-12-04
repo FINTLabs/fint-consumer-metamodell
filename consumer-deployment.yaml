@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+  labels:
+    fint.stack: metamodell
+    fint.role: consumer
+  name: consumer-metamodell
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      fint.stack: metamodell
+      fint.role: consumer
+  template:
+    metadata:
+      labels:
+        fint.stack: metamodell
+        fint.role: consumer
+    spec:
+      containers:
+      - name: consumer-metamodell
+        image: fintlabs.azurecr.io/consumer-metamodell:build-1
+        env:
+        - name: TZ
+          value: Europe/Oslo
+        - name: fint.audit.mongo.databasename
+          value: fint-audit-beta
+        - name: fint.audit.mongo.connection-string
+          valueFrom:
+            secretKeyRef:
+              name: fint-audit
+              key: mongodb
+        - name: fint.cache.manager
+          value: hazelcast
+        - name: fint.events.orgIds
+          value: health.fintlabs.no
+        - name: fint.hazelcast.kubernetes.enabled
+          value: "true"
+        - name: fint.hazelcast.kubernetes.namespace
+          value: default
+        - name: fint.hazelcast.kubernetes.labelName
+          value: fint.stack
+        - name: fint.hazelcast.kubernetes.labelValue
+          value: metamodell
+        - name: fint.relations.default-base-url
+          value: https://beta.felleskomponent.no
+        - name: server.context-path
+          value: /fint/metamodell
+        ports:
+        - containerPort: 8080
+      restartPolicy: Always
