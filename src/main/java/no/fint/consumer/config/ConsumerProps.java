@@ -23,13 +23,13 @@ public class ConsumerProps {
     private String defaultOrgId;
 
     public static final String CACHE_INITIALDELAY_KLASSE = "${fint.consumer.cache.initialDelay.klasse:60000}";
-    public static final String CACHE_FIXEDRATE_KLASSE = "${fint.consumer.cache.fixedRate.klasse:100000}";
+    public static final String CACHE_FIXEDRATE_KLASSE = "${fint.consumer.cache.fixedRate.klasse:1000000}";
     
     public static final String CACHE_INITIALDELAY_PAKKE = "${fint.consumer.cache.initialDelay.pakke:70000}";
-    public static final String CACHE_FIXEDRATE_PAKKE = "${fint.consumer.cache.fixedRate.pakke:100000}";
+    public static final String CACHE_FIXEDRATE_PAKKE = "${fint.consumer.cache.fixedRate.pakke:1000000}";
     
     public static final String CACHE_INITIALDELAY_RELASJON = "${fint.consumer.cache.initialDelay.relasjon:80000}";
-    public static final String CACHE_FIXEDRATE_RELASJON = "${fint.consumer.cache.fixedRate.relasjon:100000}";
+    public static final String CACHE_FIXEDRATE_RELASJON = "${fint.consumer.cache.fixedRate.relasjon:1000000}";
 
     private Set<String> assets;
 

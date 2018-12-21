@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-metamodell
-          image: fintlabs.azurecr.io/consumer-metamodell:build.6
+          image: fintlabs.azurecr.io/consumer-metamodell:build.10
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -39,13 +39,15 @@ spec:
               path: /fint/metamodell/health
           resources:
             limits:
-              memory: "384Mi"
-              cpu: "300m"
+              memory: "512Mi"
+              cpu: "500m"
           env:
             - name: TZ
               value: Europe/Oslo
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:+ExitOnOutOfMemoryError -Xmx256m -verbose:gc"
+            - name: fint.consumer.default-org-id
+              value: fintlabs.no
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
             - name: fint.audit.mongo.connection-string

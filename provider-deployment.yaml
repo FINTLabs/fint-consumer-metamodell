@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: provider-metamodell
-          image: fintlabs.azurecr.io/provider:PR-25.7
+          image: fintlabs.azurecr.io/provider:PR-25.9
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -44,8 +44,8 @@ spec:
           env:
             - name: TZ
               value: Europe/Oslo
-            - name: JAVA_OPTS
-              value: "-Xmx256m"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+ExitOnOutOfMemoryError -Xmx256m -verbose:gc"
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
             - name: fint.audit.mongo.connection-string
