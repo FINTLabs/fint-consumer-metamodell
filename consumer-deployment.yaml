@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-metamodell
-          image: fintlabs.azurecr.io/consumer-metamodell:build.5
+          image: fintlabs.azurecr.io/consumer-metamodell:build.6
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -40,7 +40,7 @@ spec:
           resources:
             limits:
               memory: "384Mi"
-              cpu: "200m"
+              cpu: "300m"
           env:
             - name: TZ
               value: Europe/Oslo
@@ -54,7 +54,7 @@ spec:
                   name: fint-audit
                   key: mongodb
             - name: fint.cache.manager
-              value: hazelcast
+              value: default
             - name: fint.events.orgIds
               value: health.fintlabs.no
             - name: fint.hazelcast.kubernetes.enabled
