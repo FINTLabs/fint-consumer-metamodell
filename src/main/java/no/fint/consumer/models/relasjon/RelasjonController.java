@@ -98,7 +98,7 @@ public class RelasjonController {
     }
 
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/id/{id:.+}")
     public ResponseEntity getRelasjonById(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
