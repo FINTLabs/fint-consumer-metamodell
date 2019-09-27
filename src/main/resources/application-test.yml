@@ -1,22 +1,23 @@
 spring:
-  application:
-    name: fint-consumer-metamodell
+ application:
+  name: fint-consumer-metamodell
 
 fint:
-  events:
-    test-mode: true
-    queue-endpoint-enabled: true
+ events:
+  orgIds: mock.no
+  test-mode: true
+  queue-endpoint-enabled: true
 
-  audit:
-    test-mode: true
+ audit:
+  test-mode: true
 
-  relations:
-    force-https: false
-    default-base-url: /
+ relations:
+  force-https: false
+  default-base-url: /
 
-  hazelcast:
-    members: localhost
+ hazelcast:
+  members: localhost
 
 server:
-  context-path: ""
-  port: 8080
+ context-path: ""
+ port: 8080
