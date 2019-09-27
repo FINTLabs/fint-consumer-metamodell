@@ -1,4 +1,4 @@
-package no.fint.consumer.models.relasjon;
+package no.fint.consumer.models.kontekst;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,25 +35,25 @@ import java.util.Optional;
 
 import javax.naming.NameNotFoundException;
 
-import no.fint.model.resource.metamodell.RelasjonResource;
-import no.fint.model.resource.metamodell.RelasjonResources;
+import no.fint.model.resource.metamodell.KontekstResource;
+import no.fint.model.resource.metamodell.KontekstResources;
 import no.fint.model.metamodell.MetamodellActions;
 
 @Slf4j
-@Api(tags = {"Relasjon"})
+@Api(tags = {"Kontekst"})
 @CrossOrigin
 @RestController
-@RequestMapping(name = "Relasjon", value = RestEndpoints.RELASJON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class RelasjonController {
+@RequestMapping(name = "Kontekst", value = RestEndpoints.KONTEKST, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class KontekstController {
 
     @Autowired
-    private RelasjonCacheService cacheService;
+    private KontekstCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private RelasjonLinker linker;
+    private KontekstLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -85,7 +85,7 @@ public class RelasjonController {
     }
 
     @GetMapping
-    public RelasjonResources getRelasjon(
+    public KontekstResources getKontekst(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -97,26 +97,26 @@ public class RelasjonController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_RELASJON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_KONTEKST, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<RelasjonResource> relasjon;
+        List<KontekstResource> kontekst;
         if (sinceTimeStamp == null) {
-            relasjon = cacheService.getAll(orgId);
+            kontekst = cacheService.getAll(orgId);
         } else {
-            relasjon = cacheService.getAll(orgId, sinceTimeStamp);
+            kontekst = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return linker.toResources(relasjon);
+        return linker.toResources(kontekst);
     }
 
 
     @GetMapping("/id/{id:.+}")
-    public RelasjonResource getRelasjonById(
+    public KontekstResource getKontekstById(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
@@ -128,17 +128,17 @@ public class RelasjonController {
         }
         log.debug("Id: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_RELASJON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_KONTEKST, client);
         event.setQuery("id/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<RelasjonResource> relasjon = cacheService.getRelasjonById(orgId, id);
+        Optional<KontekstResource> kontekst = cacheService.getKontekstById(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return relasjon.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+        return kontekst.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 

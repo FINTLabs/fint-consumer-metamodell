@@ -1,31 +1,44 @@
 package no.fint.consumer.models.relasjon;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.cache.CacheService;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
-import no.fint.model.metamodell.kompleksedatatyper.Identifikator;
-import no.fint.model.relation.FintResource;
+import no.fint.event.model.ResponseStatus;
+import no.fint.relations.FintResourceCompatibility;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import no.fint.model.metamodell.Relasjon;
+import no.fint.model.resource.metamodell.RelasjonResource;
 import no.fint.model.metamodell.MetamodellActions;
+import no.fint.model.metamodell.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
-public class RelasjonCacheService extends CacheService<FintResource<Relasjon>> {
+public class RelasjonCacheService extends CacheService<RelasjonResource> {
 
     public static final String MODEL = Relasjon.class.getSimpleName().toLowerCase();
+
+    @Value("${fint.consumer.compatibility.fintresource:true}")
+    private boolean checkFintResourceCompatibility;
+
+    @Autowired
+    private FintResourceCompatibility fintResourceCompatibility;
 
     @Autowired
     private ConsumerEventUtil consumerEventUtil;
@@ -33,18 +46,28 @@ public class RelasjonCacheService extends CacheService<FintResource<Relasjon>> {
     @Autowired
     private ConsumerProps props;
 
+    @Autowired
+    private RelasjonLinker linker;
+
+    private JavaType javaType;
+
+    private ObjectMapper objectMapper;
+
     public RelasjonCacheService() {
-        super(MODEL, MetamodellActions.GET_ALL_RELASJON);
+        super(MODEL, MetamodellActions.GET_ALL_RELASJON, MetamodellActions.UPDATE_RELASJON);
+        objectMapper = new ObjectMapper();
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, RelasjonResource.class);
+        objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     @PostConstruct
     public void init() {
-        Arrays.stream(props.getOrgs()).forEach(this::createCache);
+        props.getAssets().forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = ConsumerProps.CACHE_INITIALDELAY_RELASJON, fixedRateString = ConsumerProps.CACHE_FIXEDRATE_RELASJON)
+    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_RELASJON, fixedRateString = Constants.CACHE_FIXEDRATE_RELASJON)
     public void populateCacheAll() {
-        Arrays.stream(props.getOrgs()).forEach(this::populateCache);
+        props.getAssets().forEach(this::populateCache);
     }
 
     public void rebuildCache(String orgId) {
@@ -52,18 +75,18 @@ public class RelasjonCacheService extends CacheService<FintResource<Relasjon>> {
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Relasjon cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_RELASJON, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<FintResource<Relasjon>> getRelasjonById(String orgId, String id) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Relasjon::getId)
+    public Optional<RelasjonResource> getRelasjonById(String orgId, String id) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(RelasjonResource::getId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(_id -> _id.equals(id))
                 .orElse(false));
@@ -72,7 +95,24 @@ public class RelasjonCacheService extends CacheService<FintResource<Relasjon>> {
 
 	@Override
     public void onAction(Event event) {
-        update(event, new TypeReference<List<FintResource<Relasjon>>>() {
-        });
+        List<RelasjonResource> data;
+        if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
+            log.info("Compatibility: Converting FintResource<RelasjonResource> to RelasjonResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), RelasjonResource.class);
+        } else {
+            data = objectMapper.convertValue(event.getData(), javaType);
+        }
+        data.forEach(linker::mapLinks);
+        if (MetamodellActions.valueOf(event.getAction()) == MetamodellActions.UPDATE_RELASJON) {
+            if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
+                add(event.getOrgId(), data);
+                log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+            } else {
+                log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
+            }
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-metamodell
-          image: fintlabs.azurecr.io/consumer-metamodell:build.10
+          image: fintlabs.azurecr.io/consumer-metamodell:build.11
           ports:
             - containerPort: 8080
           readinessProbe:

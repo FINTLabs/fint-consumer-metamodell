@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: provider-metamodell
-          image: fintlabs.azurecr.io/provider:PR-25.9
+          image: fintlabs.azurecr.io/provider:PR-25.14
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -55,6 +55,8 @@ spec:
                   key: mongodb
             - name: fint.events.orgIds
               value: health.fintlabs.no,fintlabs.no
+            - name: fint.provider.event-state.hazelcast
+              value: "false"
             - name: fint.provider.sse.heartbeat.enabled
               value: "true"
             - name: fint.hazelcast.kubernetes.enabled
@@ -65,7 +67,7 @@ spec:
               value: fint.stack
             - name: fint.hazelcast.kubernetes.labelValue
               value: metamodell
-            #        - name: fint.provider.assets.endpoint
-            #          value: https://admin-beta.fintlabs.no/api/components/assets/utdanning_timeplan
             - name: server.context-path
               value: /fint/metamodell/provider
+            #        - name: fint.provider.assets.endpoint
+            #          value: https://admin-beta.fintlabs.no/api/components/assets/utdanning_timeplan
