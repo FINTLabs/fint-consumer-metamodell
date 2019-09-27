@@ -1,6 +1,6 @@
 spring:
   application:
-    name: fint-consumer-skeleton
+    name: fint-consumer-metamodell
 
 fint:
   events:
@@ -13,9 +13,6 @@ fint:
   relations:
     force-https: false
     default-base-url: /
-
-  cache:
-    manager: hazelcast
 
   hazelcast:
     members: localhost

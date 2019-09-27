@@ -1,4 +1,4 @@
-package no.fint.consumer.models.klasse;
+package no.fint.consumer.models.kontekst;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.fint.model.metamodell.Klasse;
-import no.fint.model.resource.metamodell.KlasseResource;
+import no.fint.model.metamodell.Kontekst;
+import no.fint.model.resource.metamodell.KontekstResource;
 import no.fint.model.metamodell.MetamodellActions;
 import no.fint.model.metamodell.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "fint.consumer.cache.disabled.klasse", havingValue = "false", matchIfMissing = true)
-public class KlasseCacheService extends CacheService<KlasseResource> {
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.kontekst", havingValue = "false", matchIfMissing = true)
+public class KontekstCacheService extends CacheService<KontekstResource> {
 
-    public static final String MODEL = Klasse.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Kontekst.class.getSimpleName().toLowerCase();
 
     @Value("${fint.consumer.compatibility.fintresource:true}")
     private boolean checkFintResourceCompatibility;
@@ -51,16 +51,16 @@ public class KlasseCacheService extends CacheService<KlasseResource> {
     private ConsumerProps props;
 
     @Autowired
-    private KlasseLinker linker;
+    private KontekstLinker linker;
 
     private JavaType javaType;
 
     private ObjectMapper objectMapper;
 
-    public KlasseCacheService() {
-        super(MODEL, MetamodellActions.GET_ALL_KLASSE, MetamodellActions.UPDATE_KLASSE);
+    public KontekstCacheService() {
+        super(MODEL, MetamodellActions.GET_ALL_KONTEKST, MetamodellActions.UPDATE_KONTEKST);
         objectMapper = new ObjectMapper();
-        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KlasseResource.class);
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KontekstResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
@@ -69,7 +69,7 @@ public class KlasseCacheService extends CacheService<KlasseResource> {
         props.getAssets().forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_KLASSE, fixedRateString = Constants.CACHE_FIXEDRATE_KLASSE)
+    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_KONTEKST, fixedRateString = Constants.CACHE_FIXEDRATE_KONTEKST)
     public void populateCacheAll() {
         props.getAssets().forEach(this::populateCache);
     }
@@ -81,17 +81,17 @@ public class KlasseCacheService extends CacheService<KlasseResource> {
 
     @Override
     public void populateCache(String orgId) {
-		log.info("Populating Klasse cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_KLASSE, Constants.CACHE_SERVICE);
+		log.info("Populating Kontekst cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_KONTEKST, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<KlasseResource> getKlasseById(String orgId, String id) {
+    public Optional<KontekstResource> getKontekstById(String orgId, String id) {
         return getOne(orgId, id.hashCode(),
             (resource) -> Optional
                 .ofNullable(resource)
-                .map(KlasseResource::getId)
+                .map(KontekstResource::getId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(id::equals)
                 .orElse(false));
@@ -100,17 +100,17 @@ public class KlasseCacheService extends CacheService<KlasseResource> {
 
 	@Override
     public void onAction(Event event) {
-        List<KlasseResource> data;
+        List<KontekstResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
-            log.info("Compatibility: Converting FintResource<KlasseResource> to KlasseResource ...");
-            data = fintResourceCompatibility.convertResourceData(event.getData(), KlasseResource.class);
+            log.info("Compatibility: Converting FintResource<KontekstResource> to KontekstResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), KontekstResource.class);
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::mapLinks);
-        if (MetamodellActions.valueOf(event.getAction()) == MetamodellActions.UPDATE_KLASSE) {
+        if (MetamodellActions.valueOf(event.getAction()) == MetamodellActions.UPDATE_KONTEKST) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                List<CacheObject<KlasseResource>> cacheObjects = data
+                List<CacheObject<KontekstResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());
@@ -120,7 +120,7 @@ public class KlasseCacheService extends CacheService<KlasseResource> {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            List<CacheObject<KlasseResource>> cacheObjects = data
+            List<CacheObject<KontekstResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());

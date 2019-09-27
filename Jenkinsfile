@@ -23,8 +23,8 @@ pipeline {
         stage('Publish PR') {
             when { changeRequest() }
             steps {
+                sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}.${BUILD_NUMBER}"
                 withDockerRegistry([credentialsId: 'fintlabs.azurecr.io', url: 'https://fintlabs.azurecr.io']) {
-                    sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}.${BUILD_NUMBER}"
                     sh "docker push fintlabs.azurecr.io/consumer-metamodell:${BRANCH_NAME}.${BUILD_NUMBER}"
                 }
             }

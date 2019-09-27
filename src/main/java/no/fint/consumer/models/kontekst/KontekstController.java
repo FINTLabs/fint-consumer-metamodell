@@ -1,4 +1,4 @@
-package no.fint.consumer.models.relasjon;
+package no.fint.consumer.models.kontekst;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -38,25 +38,25 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import no.fint.model.resource.metamodell.RelasjonResource;
-import no.fint.model.resource.metamodell.RelasjonResources;
+import no.fint.model.resource.metamodell.KontekstResource;
+import no.fint.model.resource.metamodell.KontekstResources;
 import no.fint.model.metamodell.MetamodellActions;
 
 @Slf4j
-@Api(tags = {"Relasjon"})
+@Api(tags = {"Kontekst"})
 @CrossOrigin
 @RestController
-@RequestMapping(name = "Relasjon", value = RestEndpoints.RELASJON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class RelasjonController {
+@RequestMapping(name = "Kontekst", value = RestEndpoints.KONTEKST, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class KontekstController {
 
     @Autowired(required = false)
-    private RelasjonCacheService cacheService;
+    private KontekstCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private RelasjonLinker linker;
+    private KontekstLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -76,7 +76,7 @@ public class RelasjonController {
     @GetMapping("/last-updated")
     public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Relasjon cache is disabled.");
+            throw new CacheDisabledException("Kontekst cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -88,7 +88,7 @@ public class RelasjonController {
     @GetMapping("/cache/size")
      public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Relasjon cache is disabled.");
+            throw new CacheDisabledException("Kontekst cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -97,12 +97,12 @@ public class RelasjonController {
     }
 
     @GetMapping
-    public RelasjonResources getRelasjon(
+    public KontekstResources getKontekst(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Relasjon cache is disabled.");
+            throw new CacheDisabledException("Kontekst cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -112,26 +112,26 @@ public class RelasjonController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_RELASJON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_ALL_KONTEKST, client);
         event.setOperation(Operation.READ);
         fintAuditService.audit(event);
         fintAuditService.audit(event, Status.CACHE);
 
-        List<RelasjonResource> relasjon;
+        List<KontekstResource> kontekst;
         if (sinceTimeStamp == null) {
-            relasjon = cacheService.getAll(orgId);
+            kontekst = cacheService.getAll(orgId);
         } else {
-            relasjon = cacheService.getAll(orgId, sinceTimeStamp);
+            kontekst = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return linker.toResources(relasjon);
+        return linker.toResources(kontekst);
     }
 
 
     @GetMapping("/id/{id:.+}")
-    public RelasjonResource getRelasjonById(
+    public KontekstResource getKontekstById(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
@@ -143,7 +143,7 @@ public class RelasjonController {
         }
         log.debug("id: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_RELASJON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, MetamodellActions.GET_KONTEKST, client);
         event.setOperation(Operation.READ);
         event.setQuery("id/" + id);
 
@@ -151,11 +151,11 @@ public class RelasjonController {
             fintAuditService.audit(event);
             fintAuditService.audit(event, Status.CACHE);
 
-            Optional<RelasjonResource> relasjon = cacheService.getRelasjonById(orgId, id);
+            Optional<KontekstResource> kontekst = cacheService.getKontekstById(orgId, id);
 
             fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-            return relasjon.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+            return kontekst.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
 
         } else {
             BlockingQueue<Event> queue = synchronousEvents.register(event);
@@ -166,11 +166,11 @@ public class RelasjonController {
             if (response.getData() == null ||
                     response.getData().isEmpty()) throw new EntityNotFoundException(id);
 
-            RelasjonResource relasjon = objectMapper.convertValue(response.getData().get(0), RelasjonResource.class);
+            KontekstResource kontekst = objectMapper.convertValue(response.getData().get(0), KontekstResource.class);
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(relasjon);
+            return linker.toResource(kontekst);
         }    
     }
 
