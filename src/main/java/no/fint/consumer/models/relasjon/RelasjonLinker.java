@@ -7,6 +7,7 @@ import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -39,6 +40,15 @@ public class RelasjonLinker extends FintLinker<RelasjonResource> {
         
         return null;
     }
-    
+
+    int[] hashCodes(RelasjonResource relasjon) {
+        IntStream.Builder builder = IntStream.builder();
+        if (!isNull(relasjon.getId()) && !isEmpty(relasjon.getId().getIdentifikatorverdi())) {
+            builder.add(relasjon.getId().getIdentifikatorverdi().hashCode());
+        }
+        
+        return builder.build().toArray();
+    }
+
 }
 

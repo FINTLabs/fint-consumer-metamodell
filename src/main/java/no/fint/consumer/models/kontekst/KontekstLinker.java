@@ -7,6 +7,7 @@ import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -39,6 +40,15 @@ public class KontekstLinker extends FintLinker<KontekstResource> {
         
         return null;
     }
-    
+
+    int[] hashCodes(KontekstResource kontekst) {
+        IntStream.Builder builder = IntStream.builder();
+        if (!isNull(kontekst.getId()) && !isEmpty(kontekst.getId().getIdentifikatorverdi())) {
+            builder.add(kontekst.getId().getIdentifikatorverdi().hashCode());
+        }
+        
+        return builder.build().toArray();
+    }
+
 }
 
