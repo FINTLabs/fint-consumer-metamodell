@@ -97,8 +97,6 @@ spec:
                   key: mongodb
             - name: fint.cache.manager
               value: default
-            - name: fint.events.orgIds
-              value: health.fintlabs.no
             - name: fint.hazelcast.kubernetes.enabled
               value: "true"
             - name: fint.hazelcast.kubernetes.namespace
@@ -167,8 +165,6 @@ spec:
                 secretKeyRef:
                   name: fint-audit
                   key: mongodb
-            - name: fint.events.orgIds
-              value: health.fintlabs.no
             - name: fint.provider.event-state.hazelcast
               value: "false"
             - name: fint.provider.sse.heartbeat.enabled
