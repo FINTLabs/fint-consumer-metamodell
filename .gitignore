@@ -6,3 +6,8 @@ out
 .DS_Store
 .vscode/
 *.iml
+/.classpath
+/.project
+/.settings/
+/bin/
+*.orig
