@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-metamodell
-          image: fintlabs.azurecr.io/consumer-metamodell:PR-1.3
+          image: fintlabs.azurecr.io/consumer-metamodell:build.7
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -81,6 +81,11 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
           env:
             - name: TZ
               value: Europe/Oslo
@@ -140,7 +145,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: provider-metamodell
-          image: fintlabs.azurecr.io/provider:PR-32.4
+          image: fintlabs.azurecr.io/provider:2.3.0-alpha-2
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -153,6 +158,11 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
           env:
             - name: TZ
               value: Europe/Oslo
