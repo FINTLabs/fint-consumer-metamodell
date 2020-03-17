@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-metamodell
-          image: fintlabs.azurecr.io/consumer-metamodell:build.7
+          image: fintlabs.azurecr.io/consumer-metamodell:build.8
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -102,6 +102,7 @@ spec:
                   key: mongodb
             - name: fint.cache.manager
               value: default
+            - {name: fint.events.orgIds, value: 'health.fintlabs.no,fintlabs.no'}
             - name: fint.hazelcast.kubernetes.enabled
               value: "true"
             - name: fint.hazelcast.kubernetes.namespace
@@ -175,6 +176,7 @@ spec:
                 secretKeyRef:
                   name: fint-audit
                   key: mongodb
+            - {name: fint.events.orgIds, value: 'health.fintlabs.no,fintlabs.no'}
             - name: fint.provider.event-state.hazelcast
               value: "false"
             - name: fint.provider.sse.heartbeat.enabled
