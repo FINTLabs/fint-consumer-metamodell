@@ -1,5 +1,6 @@
 package no.fint.consumer.models.relasjon;
 
+import no.fint.model.resource.AbstractCollectionResources;
 import no.fint.model.resource.Link;
 import no.fint.model.resource.metamodell.RelasjonResource;
 import no.fint.model.resource.metamodell.RelasjonResources;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -26,9 +28,14 @@ public class RelasjonLinker extends FintLinker<RelasjonResource> {
 
     @Override
     public RelasjonResources toResources(Collection<RelasjonResource> collection) {
+        return toResources(collection.stream(), 0, 0, collection.size());
+    }
+
+    @Override
+    public RelasjonResources toResources(Stream<RelasjonResource> stream, int offset, int size, int totalItems) {
         RelasjonResources resources = new RelasjonResources();
-        collection.stream().map(this::toResource).forEach(resources::addResource);
-        resources.addSelf(Link.with(self()));
+        stream.map(this::toResource).forEach(resources::addResource);
+        addPagination(resources, offset, size, totalItems);
         return resources;
     }
 
