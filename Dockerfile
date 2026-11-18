@@ -1,13 +1,11 @@
-FROM gradle:4.10.3-jdk8-alpine as builder
-USER root
-COPY . .
-ARG apiVersion
-ARG buildFlags=""
-RUN gradle --no-daemon ${buildFlags} -PapiVersion=${apiVersion} build
+# This branch keeps the code of image consumer-metamodell:build.8 (commit e76643d, March 2020),
+# which beta runs. The releases 1.0.0 and 1.0.1 do not start: springfox 3.0.0 needs Spring 5,
+# and this consumer uses Spring Boot 1.5.
+# Thus this Dockerfile takes the build.8 jars from the old image
+# and puts them on the eclipse-temurin 8 runtime.
+FROM fintlabsacr.azurecr.io/consumer-metamodell:build.8 AS release
 
-FROM gcr.io/distroless/java:8
-ENV JAVA_TOOL_OPTIONS -XX:+ExitOnOutOfMemoryError
-COPY --from=builder /home/gradle/build/deps/external/*.jar /data/
-COPY --from=builder /home/gradle/build/deps/fint/*.jar /data/
-COPY --from=builder /home/gradle/build/libs/fint-consumer-metamodell-*.jar /data/fint-consumer-metamodell.jar
-CMD ["/data/fint-consumer-metamodell.jar"]
+FROM eclipse-temurin:8-jre
+ENV JAVA_TOOL_OPTIONS="-XX:+ExitOnOutOfMemoryError"
+COPY --from=release /data/ /data/
+ENTRYPOINT ["java", "-jar", "/data/fint-consumer-metamodell.jar"]
